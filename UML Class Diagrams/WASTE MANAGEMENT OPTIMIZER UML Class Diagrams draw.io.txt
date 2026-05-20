@@ -1,0 +1,119 @@
+classDiagram
+    %% Core App
+    class WasteManagementOptimizerApp {
+        -int totalWasteCollected
+        -int totalDispatches
+        -List~SmartBin~ bins
+        -DispatchCenter dispatchCenter
+        -Timer autoFillTimer
+        +main(String[] args)
+        +incrementAnalytics(int)
+        +log(String)
+    }
+
+    %% 1. Singleton Pattern (Theme A - Traffic Sensors)
+    class CityTrafficSystem {
+        -static CityTrafficSystem instance
+        -boolean isHeavyTraffic
+        -CityTrafficSystem()
+        +static CityTrafficSystem getInstance()
+        +boolean isHeavyTraffic()
+        +void setHeavyTraffic(boolean)
+        +double getTrafficMultiplier()
+    }
+
+    %% 2. Strategy Pattern (Emergency Routing)
+    class RoutingStrategy {
+        <<interface>>
+        +calculateRoute(SmartBin bin) RouteInfo
+    }
+    class FastestRoute {
+        +calculateRoute(SmartBin bin) RouteInfo
+    }
+    class EcoFriendlyRoute {
+        +calculateRoute(SmartBin bin) RouteInfo
+    }
+    class RouteInfo {
+        <<record>>
+        +String description
+        +int estimatedTimeMs
+    }
+
+    %% 3. Observer Pattern (Utility Monitoring)
+    class Subject {
+        <<interface>>
+        +addObserver(Observer)
+        +removeObserver(Observer)
+        +notifyObservers()
+    }
+    class Observer {
+        <<interface>>
+        +update(SmartBin bin)
+    }
+    class DispatchCenter {
+        -RoutingStrategy strategy
+        +setStrategy(RoutingStrategy)
+        +update(SmartBin bin)
+    }
+
+    %% 4. Factory Method Pattern (Smart Bins)
+    class BinFactory {
+        <<abstract>>
+        +createBin(String id)* SmartBin
+    }
+    class OrganicBinFactory {
+        +createBin(String id) SmartBin
+    }
+    class RecyclingBinFactory {
+        +createBin(String id) SmartBin
+    }
+    class GlassBinFactory {
+        +createBin(String id) SmartBin
+    }
+    class HazardousBinFactory {
+        +createBin(String id) SmartBin
+    }
+
+    class SmartBin {
+        <<abstract>>
+        -String id
+        -String type
+        -int capacity
+        -BinState state
+        +addWaste(int)
+        +emptyBin()
+        +setState(BinState)
+    }
+    class OrganicBin
+    class RecyclingBin
+    class GlassBin
+    class HazardousBin
+
+    %% Relationships & Dependencies
+    RoutingStrategy <|.. FastestRoute
+    RoutingStrategy <|.. EcoFriendlyRoute
+    DispatchCenter o-- RoutingStrategy
+    Observer <|.. DispatchCenter
+    
+    Subject <|.. SmartBin
+    SmartBin <|-- OrganicBin
+    SmartBin <|-- RecyclingBin
+    SmartBin <|-- GlassBin
+    SmartBin <|-- HazardousBin
+    Subject o-- Observer : notifies
+    
+    BinFactory <|-- OrganicBinFactory
+    BinFactory <|-- RecyclingBinFactory
+    BinFactory <|-- GlassBinFactory
+    BinFactory <|-- HazardousBinFactory
+    
+    OrganicBinFactory ..> OrganicBin : creates
+    RecyclingBinFactory ..> RecyclingBin : creates
+    GlassBinFactory ..> GlassBin : creates
+    HazardousBinFactory ..> HazardousBin : creates
+
+    WasteManagementOptimizerApp *-- DispatchCenter
+    WasteManagementOptimizerApp *-- SmartBin
+    
+    FastestRoute ..> CityTrafficSystem : uses
+    EcoFriendlyRoute ..> CityTrafficSystem : uses
